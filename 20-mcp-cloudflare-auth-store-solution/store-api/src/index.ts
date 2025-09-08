@@ -58,7 +58,10 @@ let shoppingCarts: { [userId: string]: { [cartId: string]: Array<{ productId: nu
 app.get('/api/products/search', (req, res) => {
   const query = req.query.q as string;
   
+  console.log(`🔍 [PRODUCTS] Search request: query="${query || 'all products'}"`);
+  
   if (!query) {
+    console.log(`📦 [PRODUCTS] Returning all ${groceryProducts.length} products`);
     return res.json(groceryProducts);
   }
   
@@ -67,6 +70,7 @@ app.get('/api/products/search', (req, res) => {
     product.category.toLowerCase().includes(query.toLowerCase())
   );
   
+  console.log(`📦 [PRODUCTS] Found ${filteredProducts.length} products matching "${query}"`);
   res.json(filteredProducts);
 });
 
@@ -75,30 +79,44 @@ app.post('/api/users/:userId/cart/:cartId/items', (req, res) => {
   const cartId = req.params.cartId;
   const { productId, quantity } = req.body;
   
+  console.log(`🛒 [CART] Add item request: userId="${userId}", cartId="${cartId}", productId=${productId}, quantity=${quantity}`);
+  
   if (!productId || !quantity || quantity <= 0) {
+    console.log(`❌ [CART] Invalid request: missing or invalid productId/quantity`);
     return res.status(400).json({ error: 'ProductId und quantity sind erforderlich' });
   }
   
   const product = groceryProducts.find(p => p.id === productId);
   if (!product) {
+    console.log(`❌ [CART] Product not found: productId=${productId}`);
     return res.status(404).json({ error: 'Produkt nicht gefunden' });
   }
   
+  console.log(`📝 [CART] Product found: "${product.name}" (CHF ${product.price})`);
+  
   if (!shoppingCarts[userId]) {
     shoppingCarts[userId] = {};
+    console.log(`🆕 [CART] Created new user cart storage for userId="${userId}"`);
   }
   
   if (!shoppingCarts[userId][cartId]) {
     shoppingCarts[userId][cartId] = [];
+    console.log(`🆕 [CART] Created new cart "${cartId}" for user "${userId}"`);
   }
   
   const existingItem = shoppingCarts[userId][cartId].find(item => item.productId === productId);
   
   if (existingItem) {
+    const oldQuantity = existingItem.quantity;
     existingItem.quantity += quantity;
+    console.log(`🔄 [CART] Updated existing item: "${product.name}" quantity ${oldQuantity} -> ${existingItem.quantity}`);
   } else {
     shoppingCarts[userId][cartId].push({ productId, quantity });
+    console.log(`➕ [CART] Added new item: "${product.name}" x${quantity}`);
   }
+  
+  const totalItems = shoppingCarts[userId][cartId].length;
+  console.log(`✅ [CART] Cart "${cartId}" now has ${totalItems} different items`);
   
   res.json({ message: 'Artikel zum Warenkorb hinzugefügt', cart: shoppingCarts[userId][cartId] });
 });
@@ -106,16 +124,30 @@ app.post('/api/users/:userId/cart/:cartId/items', (req, res) => {
 app.get('/api/users/:userId/cart/:cartId', (req, res) => {
   const userId = req.params.userId;
   const cartId = req.params.cartId;
+  
+  console.log(`📋 [CART] Get cart request: userId="${userId}", cartId="${cartId}"`);
+  
   const cart = (shoppingCarts[userId] && shoppingCarts[userId][cartId]) || [];
+  
+  if (cart.length === 0) {
+    console.log(`🛒 [CART] Empty cart for userId="${userId}", cartId="${cartId}"`);
+  } else {
+    console.log(`🛒 [CART] Found ${cart.length} items in cart`);
+  }
   
   const cartWithProducts = cart.map(item => {
     const product = groceryProducts.find(p => p.id === item.productId);
+    const totalPrice = product ? product.price * item.quantity : 0;
+    console.log(`📦 [CART] Item: "${product?.name || 'Unknown'}" x${item.quantity} = CHF ${totalPrice.toFixed(2)}`);
     return {
       ...item,
       product,
-      totalPrice: product ? product.price * item.quantity : 0
+      totalPrice
     };
   });
+  
+  const totalCartValue = cartWithProducts.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+  console.log(`💰 [CART] Total cart value: CHF ${totalCartValue.toFixed(2)}`);
   
   res.json(cartWithProducts);
 });
