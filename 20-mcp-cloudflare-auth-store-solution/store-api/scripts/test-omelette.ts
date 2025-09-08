@@ -13,6 +13,7 @@ interface CartItem {
 }
 
 const BASE_URL = 'http://localhost:3000';
+const USER_ID = 'test-user-123';
 const CART_ID = 'omelette-cart-123';
 
 const omeletteIngredients = [
@@ -34,9 +35,9 @@ async function searchProducts(query: string): Promise<Product[]> {
   }
 }
 
-async function addToCart(cartId: string, productId: number, quantity: number): Promise<void> {
+async function addToCart(userId: string, cartId: string, productId: number, quantity: number): Promise<void> {
   try {
-    const response = await fetch(`${BASE_URL}/api/cart/${cartId}/items`, {
+    const response = await fetch(`${BASE_URL}/api/users/${userId}/cart/${cartId}/items`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -55,9 +56,9 @@ async function addToCart(cartId: string, productId: number, quantity: number): P
   }
 }
 
-async function getCart(cartId: string): Promise<CartItem[]> {
+async function getCart(userId: string, cartId: string): Promise<CartItem[]> {
   try {
-    const response = await fetch(`${BASE_URL}/api/cart/${cartId}`);
+    const response = await fetch(`${BASE_URL}/api/users/${userId}/cart/${cartId}`);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -92,12 +93,12 @@ async function testOmeletteWorkflow(): Promise<void> {
   console.log(`\n🛒 Füge ${foundProducts.length} Produkte zum Warenkorb hinzu:`);
   
   for (const product of foundProducts) {
-    await addToCart(CART_ID, product.id, 1);
+    await addToCart(USER_ID, CART_ID, product.id, 1);
     await new Promise(resolve => setTimeout(resolve, 100));
   }
   
   console.log('\n📋 Warenkorb Inhalt:');
-  const cart = await getCart(CART_ID);
+  const cart = await getCart(USER_ID, CART_ID);
   
   if (cart.length === 0) {
     console.log('   Warenkorb ist leer');

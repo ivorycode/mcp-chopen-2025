@@ -53,7 +53,7 @@ const groceryProducts = [
   { id: 4000000007, name: 'Salat', category: 'Gemüse', price: 1.79 }
 ];
 
-let shoppingCarts: { [cartId: string]: Array<{ productId: number; quantity: number }> } = {};
+let shoppingCarts: { [userId: string]: { [cartId: string]: Array<{ productId: number; quantity: number }> } } = {};
 
 app.get('/api/products/search', (req, res) => {
   const query = req.query.q as string;
@@ -70,7 +70,8 @@ app.get('/api/products/search', (req, res) => {
   res.json(filteredProducts);
 });
 
-app.post('/api/cart/:cartId/items', (req, res) => {
+app.post('/api/users/:userId/cart/:cartId/items', (req, res) => {
+  const userId = req.params.userId;
   const cartId = req.params.cartId;
   const { productId, quantity } = req.body;
   
@@ -83,24 +84,29 @@ app.post('/api/cart/:cartId/items', (req, res) => {
     return res.status(404).json({ error: 'Produkt nicht gefunden' });
   }
   
-  if (!shoppingCarts[cartId]) {
-    shoppingCarts[cartId] = [];
+  if (!shoppingCarts[userId]) {
+    shoppingCarts[userId] = {};
   }
   
-  const existingItem = shoppingCarts[cartId].find(item => item.productId === productId);
+  if (!shoppingCarts[userId][cartId]) {
+    shoppingCarts[userId][cartId] = [];
+  }
+  
+  const existingItem = shoppingCarts[userId][cartId].find(item => item.productId === productId);
   
   if (existingItem) {
     existingItem.quantity += quantity;
   } else {
-    shoppingCarts[cartId].push({ productId, quantity });
+    shoppingCarts[userId][cartId].push({ productId, quantity });
   }
   
-  res.json({ message: 'Artikel zum Warenkorb hinzugefügt', cart: shoppingCarts[cartId] });
+  res.json({ message: 'Artikel zum Warenkorb hinzugefügt', cart: shoppingCarts[userId][cartId] });
 });
 
-app.get('/api/cart/:cartId', (req, res) => {
+app.get('/api/users/:userId/cart/:cartId', (req, res) => {
+  const userId = req.params.userId;
   const cartId = req.params.cartId;
-  const cart = shoppingCarts[cartId] || [];
+  const cart = (shoppingCarts[userId] && shoppingCarts[userId][cartId]) || [];
   
   const cartWithProducts = cart.map(item => {
     const product = groceryProducts.find(p => p.id === item.productId);
