@@ -27,6 +27,7 @@ async function main() {
       model: google('gemini-2.5-flash'),
       messages,
       stopWhen: stepCountIs(5), // preparation for Exercise
+      // tools // Exercise ...
     });
 
     let fullResponse = '';
