@@ -4,15 +4,34 @@
 
 ## A Simple AI Chatbot
 
-https://ai-sdk.dev/docs/getting-started/nodejs
+We are going to extend a simple chatbot with a tool.
 
-https://ai-sdk.dev/docs/getting-started/nextjs-app-router
+In this exercise you can choose between a simple console-based chatbot implemented in Node or a simple web-based chatbot implemented in React. Choose the corresponding directory from the repository:
+
+- `/01-chatbot-node`
+- `/02-chatbot-react`
+
+In the directory you have chosen: 
+
+- first make a copy of the file `.env.example` with the name `.env` and **add your API Keys** for one or several AI-Providers
+
+- then run the following commands:
+
+```bash
+npm install
+npm start
+```
+
+This should start the chatbot on the command-line or it should start a web server serving the url `http://localhost:3000` , which you can open in your browser.
+
+Study the implementation of the chatbot.
+You can find more information about the used Vercel AI SDK here:
+
+- https://ai-sdk.dev/docs/getting-started/nodejs
+
+- https://ai-sdk.dev/docs/getting-started/nextjs-app-router
 
 
-
-### Run the chatbot
-
-Add your API Key to `.env`
 
 
 
