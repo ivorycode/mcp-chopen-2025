@@ -104,7 +104,7 @@ async function testOmeletteWorkflow(): Promise<void> {
     console.log('   Warenkorb ist leer');
     return;
   }
-  
+   
   let totalCost = 0;
   cart.forEach((item, index) => {
     const price = item.totalPrice || 0;
