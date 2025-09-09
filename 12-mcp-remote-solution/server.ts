@@ -44,7 +44,7 @@ async function main() {
   });
 
   // Start the server
-  const PORT = 3000;
+  const PORT = 4000;
   app.listen(PORT, (error) => {
     if (error) {
       console.error('Failed to start server:', error);

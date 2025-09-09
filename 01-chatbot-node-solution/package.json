@@ -17,6 +17,7 @@
     "@ai-sdk/anthropic": "^2.0.12",
     "@ai-sdk/google": "^2.0.12",
     "@ai-sdk/openai": "^2.0.24",
+    "@modelcontextprotocol/sdk": "^1.17.5",
     "ai": "^5.0.34",
     "dotenv": "^17.2.2"
   }

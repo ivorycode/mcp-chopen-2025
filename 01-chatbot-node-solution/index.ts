@@ -5,7 +5,8 @@ import {ModelMessage, stepCountIs, streamText} from 'ai';
 import 'dotenv/config';
 import * as readline from 'node:readline/promises';
 import {createTools} from './tools/tools.ts';
-import {createMcpClient} from './tools/mcp-tools.ts';
+import {createMcpStdioClient} from './tools/mcp-stdio-tools.ts';
+import {createMcpRemoteClient} from './tools/mcp-remote-tools.js';
 
 const terminal = readline.createInterface({
   input: process.stdin,
@@ -15,7 +16,8 @@ const terminal = readline.createInterface({
 const messages: ModelMessage[] = [];
 
 // const tools = createTools();
-const mcpClient = await createMcpClient();
+// const mcpClient = await createMcpStdioClient();
+const mcpClient = await createMcpRemoteClient();
 const tools = await mcpClient.tools();
 
 async function main() {
