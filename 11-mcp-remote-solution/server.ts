@@ -5,6 +5,21 @@ import {StreamableHTTPServerTransport} from "@modelcontextprotocol/sdk/server/st
 import {registerTimeTool} from './tools/timeTool.ts';
 import {registerWeatherTools} from './tools/weatherTool.ts';
 
+function createMcpServer() {
+  const server = new McpServer({
+    name: "workshop-mcp-server",
+    version: "1.0.0",
+    capabilities: {
+      tools: {},
+    },
+  });
+
+  registerTimeTool(server);
+  registerWeatherTools(server);
+
+  return server;
+}
+
 
 async function main() {
 
@@ -61,20 +76,6 @@ main().catch((error) => {
 });
 
 
-function createMcpServer() {
-  const server = new McpServer({
-    name: "workshop-mcp-server",
-    version: "1.0.0",
-    capabilities: {
-      tools: {},
-    },
-  });
-
-  registerTimeTool(server);
-  registerWeatherTools(server);
-  
-  return server;
-}
   
   
   

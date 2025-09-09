@@ -4,6 +4,8 @@ import { McpAgent } from "agents/mcp";
 import { Octokit } from "octokit";
 import { z } from "zod";
 import { GitHubHandler } from "./github-handler";
+import { registerTimeTool } from "./tools/timeTool";
+import { registerWeatherTools } from "./tools/weatherTool";
 
 // Context from the auth process, encrypted & stored in the auth token
 // and provided to the DurableMCP as this.props
@@ -26,7 +28,9 @@ export class MyMCP extends McpAgent<Env, Record<string, never>, Props> {
   });
 
   async init() {
-    // Hello, world!
+    registerTimeTool(this.server);
+    registerWeatherTools(this.server);
+
     this.server.tool("add", "Add two numbers the way only MCP can", { a: z.number(), b: z.number() }, async ({ a, b }) => ({
       content: [{ text: String(a + b), type: "text" }],
     }));
