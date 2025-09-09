@@ -7,7 +7,6 @@ const server = new McpServer({
   name: "workshop-mcp-server",
   version: "1.0.0",
   capabilities: {
-    resources: {},
     tools: {},
   },
 });
@@ -18,7 +17,7 @@ registerWeatherTools(server);
 async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("Minimal MCP Server running on stdio");
+  console.error("\n\n-- MCP Server: Workshop Server running on stdio\n\n");
 }
 
 main().catch((error) => {

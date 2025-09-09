@@ -16,7 +16,7 @@ export function registerWeatherTools(server: McpServer) {
         location,
         temperature,
       };
-      console.error(`\n\n -- GET WEATHER ${location} ${temperature} --\n\n`)
+      console.error(`\n\n-- MCP Server: GET WEATHER ${location} ${temperature} --\n\n`)
       return {
         structuredContent,
         content: [{
@@ -37,7 +37,7 @@ export function registerWeatherTools(server: McpServer) {
     },
     async ({temperature}) => {
       const celsius = Math.round((temperature - 32) * (5 / 9));
-      console.error(`\n\n-- CONVERT TEMP ${temperature} -> ${celsius} --\n\n`)
+      console.error(`\n\n-- MCP Server: CONVERT TEMP ${temperature} -> ${celsius} --\n\n`)
       return {
         structuredContent: {
           celsius,

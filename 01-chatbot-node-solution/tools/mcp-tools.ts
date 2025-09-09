@@ -6,7 +6,7 @@ export async function createMcpClient() {
   const mcpClient = await createMCPClient({
     transport: new StdioMCPTransport({
       command: 'npx',
-      args: ['tsx', '../mcp-server/server.ts'],
+      args: ['tsx', '../10-mcp-node-solution/server.ts'],
     }),
   });
 

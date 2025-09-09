@@ -4,9 +4,8 @@ import { google } from '@ai-sdk/google';
 import {ModelMessage, stepCountIs, streamText} from 'ai';
 import 'dotenv/config';
 import * as readline from 'node:readline/promises';
-import {createTools} from './tools/tools';
-
-const tools = createTools();
+import {createTools} from './tools/tools.ts';
+import {createMcpClient} from './tools/mcp-tools.ts';
 
 const terminal = readline.createInterface({
   input: process.stdin,
@@ -14,6 +13,10 @@ const terminal = readline.createInterface({
 });
 
 const messages: ModelMessage[] = [];
+
+// const tools = createTools();
+const mcpClient = await createMcpClient();
+const tools = await mcpClient.tools();
 
 async function main() {
   while (true) {
@@ -41,9 +44,13 @@ async function main() {
     // console.log(await result.toolCalls);
     const results = await result.toolResults;
     // console.log(results);
-    console.log(results?.at(-1)?.output);
+    // console.log(results?.at(-1)?.output);
     messages.push({ role: 'assistant', content: fullResponse });
   }
 }
 
-main().catch(console.error);
+main().catch((e) => {
+  console.error(e);
+  terminal.close()
+  mcpClient.close();
+});

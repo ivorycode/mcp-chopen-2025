@@ -6,6 +6,7 @@ export function registerTimeTool(server: McpServer){
     "Get the current time",
     async () => {
       let date = new Date().toISOString();
+      console.error(`\n\n-- MCP Server: GET TIME ${location} ${date} --\n\n`)
       return {
         content: [{
           type: "text",
