@@ -1,0 +1,94 @@
+export interface Product {
+  id: number;
+  name: string;
+  category: string;
+  price: number;
+}
+
+export interface CartItem {
+  productId: number;
+  quantity: number;
+  product?: Product;
+  totalPrice?: number;
+}
+
+
+
+const BASE_URL = 'http://localhost:3000';
+
+export async function searchProducts(query: string): Promise<Product[]> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/products/search?q=${encodeURIComponent(query)}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json() as Product[];
+  } catch (error) {
+    console.error(`Fehler beim Suchen nach "${query}":`, error);
+    return [];
+  }
+}
+
+export async function addToCart(userId: string, productId: number, quantity: number): Promise<void> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/users/${userId}/cart/items`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ productId, quantity }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json() as { message: string };
+    console.log(`✓ ${result.message}`);
+  } catch (error) {
+    console.error(`Fehler beim Hinzufügen von Produkt ${productId}:`, error);
+  }
+}
+
+export async function getCart(userId: string): Promise<CartItem[]> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/users/${userId}/cart`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json() as CartItem[];
+  } catch (error) {
+    console.error('Fehler beim Abrufen des Warenkorbs:', error);
+    return [];
+  }
+}
+
+export interface CartSummary {
+  userId: string;
+  totalValue: number;
+  productCount: number;
+  submitted: boolean;
+}
+
+export async function submitCart(userId: string): Promise<{ message: string; submittedItems: number; totalValue: number }> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/users/${userId}/cart/submit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({})) as { error?: string };
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error || 'Unknown error'}`);
+    }
+
+    const result = await response.json() as { message: string; submittedItems: number; totalValue: number };
+    console.log(`✅ ${result.message} (${result.submittedItems} Artikel, CHF ${result.totalValue.toFixed(2)})`);
+    return result;
+  } catch (error) {
+    console.error(`Fehler beim Abschicken des Warenkorbs für userId ${userId}:`, error);
+    throw error;
+  }
+}
