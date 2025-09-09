@@ -53,7 +53,7 @@ const groceryProducts = [
   { id: 4000000007, name: 'Salat', category: 'Gemüse', price: 1.79 }
 ];
 
-let shoppingCarts: { [userId: string]: Array<{ productId: number; quantity: number }> } = {};
+let shoppingCarts: { [userId: string]: { items: Array<{ productId: number; quantity: number }>; submitted: boolean } } = {};
 
 app.get('/api/products/search', (req, res) => {
   const query = req.query.q as string;
@@ -94,25 +94,25 @@ app.post('/api/users/:userId/cart/items', (req, res) => {
   console.log(`📝 [CART] Product found: "${product.name}" (CHF ${product.price})`);
   
   if (!shoppingCarts[userId]) {
-    shoppingCarts[userId] = [];
+    shoppingCarts[userId] = { items: [], submitted: false };
     console.log(`🆕 [CART] Created new cart for userId="${userId}"`);
   }
   
-  const existingItem = shoppingCarts[userId].find(item => item.productId === productId);
+  const existingItem = shoppingCarts[userId].items.find(item => item.productId === productId);
   
   if (existingItem) {
     const oldQuantity = existingItem.quantity;
     existingItem.quantity += quantity;
     console.log(`🔄 [CART] Updated existing item: "${product.name}" quantity ${oldQuantity} -> ${existingItem.quantity}`);
   } else {
-    shoppingCarts[userId].push({ productId, quantity });
+    shoppingCarts[userId].items.push({ productId, quantity });
     console.log(`➕ [CART] Added new item: "${product.name}" x${quantity}`);
   }
   
-  const totalItems = shoppingCarts[userId].length;
+  const totalItems = shoppingCarts[userId].items.length;
   console.log(`✅ [CART] Cart now has ${totalItems} different items`);
   
-  res.json({ message: 'Artikel zum Warenkorb hinzugefügt', cart: shoppingCarts[userId] });
+  res.json({ message: 'Artikel zum Warenkorb hinzugefügt', cart: shoppingCarts[userId].items });
 });
 
 app.get('/api/users/:userId/cart', (req, res) => {
@@ -120,7 +120,7 @@ app.get('/api/users/:userId/cart', (req, res) => {
   
   console.log(`📋 [CART] Get cart request: userId="${userId}"`);
   
-  const cart = shoppingCarts[userId] || [];
+  const cart = shoppingCarts[userId]?.items || [];
   
   if (cart.length === 0) {
     console.log(`🛒 [CART] Empty cart for userId="${userId}"`);
@@ -143,6 +143,84 @@ app.get('/api/users/:userId/cart', (req, res) => {
   console.log(`💰 [CART] Total cart value: CHF ${totalCartValue.toFixed(2)}`);
   
   res.json(cartWithProducts);
+});
+
+app.post('/api/users/:userId/cart/submit', (req, res) => {
+  const userId = req.params.userId;
+  
+  console.log(`📮 [SUBMIT] Submit cart request: userId="${userId}"`);
+  
+  if (!shoppingCarts[userId] || shoppingCarts[userId].items.length === 0) {
+    console.log(`❌ [SUBMIT] Cannot submit empty cart for userId="${userId}"`);
+    return res.status(400).json({ error: 'Warenkorb ist leer und kann nicht abgeschickt werden' });
+  }
+  
+  if (shoppingCarts[userId].submitted) {
+    console.log(`❌ [SUBMIT] Cart already submitted for userId="${userId}"`);
+    return res.status(400).json({ error: 'Warenkorb wurde bereits abgeschickt' });
+  }
+  
+  const cart = shoppingCarts[userId].items;
+  const cartWithProducts = cart.map(item => {
+    const product = groceryProducts.find(p => p.id === item.productId);
+    const totalPrice = product ? product.price * item.quantity : 0;
+    return {
+      ...item,
+      product,
+      totalPrice
+    };
+  });
+  
+  const totalCartValue = cartWithProducts.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+  
+  shoppingCarts[userId].submitted = true;
+  
+  console.log(`✅ [SUBMIT] Cart submitted successfully!`);
+  console.log(`📋 [SUBMIT] Items in submitted cart:`);
+  cartWithProducts.forEach((item, index) => {
+    console.log(`   ${index + 1}. "${item.product?.name || 'Unknown'}" x${item.quantity} = CHF ${item.totalPrice?.toFixed(2) || '0.00'}`);
+  });
+  console.log(`💰 [SUBMIT] Total submitted value: CHF ${totalCartValue.toFixed(2)}`);
+  
+  res.json({ 
+    message: 'Warenkorb erfolgreich abgeschickt', 
+    submittedItems: cartWithProducts.length,
+    totalValue: totalCartValue 
+  });
+});
+
+app.get('/api/carts/summary', (req, res) => {
+  console.log(`📊 [SUMMARY] Get all carts summary request`);
+  
+  const summaries = Object.entries(shoppingCarts).map(([userId, cartData]) => {
+    const cartWithProducts = cartData.items.map(item => {
+      const product = groceryProducts.find(p => p.id === item.productId);
+      const totalPrice = product ? product.price * item.quantity : 0;
+      return {
+        ...item,
+        product,
+        totalPrice
+      };
+    });
+    
+    const totalValue = cartWithProducts.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+    const productCount = cartData.items.reduce((sum, item) => sum + item.quantity, 0);
+    
+    return {
+      userId,
+      totalValue,
+      productCount,
+      submitted: cartData.submitted
+    };
+  });
+  
+  console.log(`📊 [SUMMARY] Found ${summaries.length} carts total`);
+  summaries.forEach((summary, index) => {
+    const status = summary.submitted ? 'SUBMITTED' : 'PENDING';
+    console.log(`   ${index + 1}. User: "${summary.userId}" | ${summary.productCount} items | CHF ${summary.totalValue.toFixed(2)} | ${status}`);
+  });
+  
+  res.json(summaries);
 });
 
 app.listen(PORT, () => {

@@ -1,4 +1,4 @@
-import {addToCart, getCart, type Product, searchProducts} from '../src/cart-api-client';
+import {addToCart, getCart, type Product, searchProducts, submitCart, getCartsSummary} from '../src/cart-api-client';
 
 
 const USER_ID = 'test-user-123';
@@ -54,6 +54,28 @@ async function testOmeletteWorkflow(): Promise<void> {
   });
   
   console.log(`\n💰 Gesamtkosten: CHF ${totalCost.toFixed(2)}`);
+  
+  console.log('\n📮 Warenkorb abschicken...');
+  try {
+    await submitCart(USER_ID);
+  } catch (error) {
+    console.log(`❌ Fehler beim Abschicken: ${error}`);
+  }
+  
+  console.log('\n📊 Warenkorb-Zusammenfassung aller Benutzer:');
+  const summaries = await getCartsSummary();
+  if (summaries.length === 0) {
+    console.log('   Keine Warenkörbe gefunden');
+  } else {
+    summaries.forEach((summary, index) => {
+      const status = summary.submitted ? '✅ ABGESCHICKT' : '⏳ AUSSTEHEND';
+      console.log(`   ${index + 1}. Benutzer: ${summary.userId}`);
+      console.log(`      Produkte: ${summary.productCount} Artikel`);
+      console.log(`      Gesamtwert: CHF ${summary.totalValue.toFixed(2)}`);
+      console.log(`      Status: ${status}`);
+    });
+  }
+  
   console.log('\n✅ Omelette-Einkauf abgeschlossen!');
 }
 

@@ -62,3 +62,45 @@ export async function getCart(userId: string): Promise<CartItem[]> {
     return [];
   }
 }
+
+export interface CartSummary {
+  userId: string;
+  totalValue: number;
+  productCount: number;
+  submitted: boolean;
+}
+
+export async function submitCart(userId: string): Promise<void> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/users/${userId}/cart/submit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({})) as { error?: string };
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error || 'Unknown error'}`);
+    }
+
+    const result = await response.json() as { message: string; submittedItems: number; totalValue: number };
+    console.log(`✅ ${result.message} (${result.submittedItems} Artikel, CHF ${result.totalValue.toFixed(2)})`);
+  } catch (error) {
+    console.error(`Fehler beim Abschicken des Warenkorbs für userId ${userId}:`, error);
+    throw error;
+  }
+}
+
+export async function getCartsSummary(): Promise<CartSummary[]> {
+  try {
+    const response = await fetch(`${BASE_URL}/api/carts/summary`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json() as CartSummary[];
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Warenkorb-Zusammenfassung:', error);
+    return [];
+  }
+}
