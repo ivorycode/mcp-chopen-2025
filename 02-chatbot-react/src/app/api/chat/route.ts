@@ -7,7 +7,7 @@ import {createTools} from '@/tools/tools';
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
-const tools = createTools();
+// const tools = createTools();
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     model: google('gemini-2.5-flash'),
     messages: convertToModelMessages(messages),
     stopWhen: stepCountIs(5), // preparation for Exercise
-    tools,
+    // tools,
   });
 
   return result.toUIMessageStreamResponse();

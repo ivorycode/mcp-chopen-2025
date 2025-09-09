@@ -15,10 +15,10 @@ const terminal = readline.createInterface({
 
 const messages: ModelMessage[] = [];
 
-// const tools = createTools();
+const tools = createTools();
 // const mcpClient = await createMcpStdioClient();
-const mcpClient = await createMcpRemoteClient();
-const tools = await mcpClient.tools();
+// const mcpClient = await createMcpRemoteClient();
+// const tools = await mcpClient.tools();
 
 async function main() {
   while (true) {
@@ -54,5 +54,5 @@ async function main() {
 main().catch((e) => {
   console.error(e);
   terminal.close()
-  mcpClient.close();
+  // mcpClient.close();
 });
