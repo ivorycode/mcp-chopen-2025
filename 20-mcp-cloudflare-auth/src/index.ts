@@ -14,6 +14,11 @@ type Props = {
   accessToken: string;
 };
 
+const ALLOWED_USERNAMES = new Set<string>([
+  // Add GitHub usernames of users who should have access to the protected tool
+  "jbandi",
+]);
+
 export class MyMCP extends McpAgent<Env, Record<string, never>, Props> {
   server = new McpServer({
     name: "Github OAuth Proxy Demo",
@@ -21,20 +26,13 @@ export class MyMCP extends McpAgent<Env, Record<string, never>, Props> {
   });
 
   async init() {
-    // Use the upstream access token to facilitate tools
-    // this.server.tool("userInfoOctokit", "Get user info from GitHub, via Octokit", {}, async () => {
-    //   const octokit = new Octokit({ auth: this.props.accessToken });
-    //   return {
-    //     content: [
-    //       {
-    //         text: JSON.stringify(await octokit.rest.users.getAuthenticated()),
-    //         type: "text",
-    //       },
-    //     ],
-    //   };
-    // });
+    // Hello, world!
+    this.server.tool("add", "Add two numbers the way only MCP can", { a: z.number(), b: z.number() }, async ({ a, b }) => ({
+      content: [{ text: String(a + b), type: "text" }],
+    }));
 
-    this.server.tool("userInfo", "Get user info from GitHub", {}, async () => {
+    // Use the upstream access token to facilitate tools
+    this.server.tool("userInfoOctokit", "Get user info from GitHub, via Octokit", {}, async () => {
       const octokit = new Octokit({ auth: this.props.accessToken });
       return {
         content: [
@@ -46,24 +44,27 @@ export class MyMCP extends McpAgent<Env, Record<string, never>, Props> {
       };
     });
 
-    this.server.tool(
-      "product-catalog",
-      "Search a product with the given search term",
-      { searchTerm: z.string() },
-      async ({ searchTerm }) => {
-        const octokit = new Octokit({ auth: this.props.accessToken });
-        console.log("User", octokit);
-
-        const productId = Math.floor(Math.random() * (9999 - 1000 + 1)) + 1000;
-        return {
-          content: [{ type: "text", text: `Found synonym product with id ${productId}` }],
-          structuredContent: {
-            productId,
-            searchTerm,
-          },
-        };
-      },
-    );
+    // Dynamically add tools based on the user's login. In this case, I want to limit
+    // access to my Image Generation tool to just me
+    if (ALLOWED_USERNAMES.has(this.props.login)) {
+      this.server.tool(
+        "protected-echo",
+        "Adding my secret signature hash to the text that is provided.",
+        {
+          text: z.string().describe("A text that should be echoed back to the caller with a signature hash."),
+        },
+        async ({ text }) => {
+          return {
+            content: [
+              {
+                type: "text",
+                text: `${text} - 1234567`,
+              },
+            ],
+          };
+        },
+      );
+    }
   }
 }
 

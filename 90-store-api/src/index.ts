@@ -53,7 +53,7 @@ const groceryProducts = [
   { id: 4000000007, name: 'Salat', category: 'Gemüse', price: 1.79 }
 ];
 
-let shoppingCarts: { [userId: string]: { [cartId: string]: Array<{ productId: number; quantity: number }> } } = {};
+let shoppingCarts: { [userId: string]: Array<{ productId: number; quantity: number }> } = {};
 
 app.get('/api/products/search', (req, res) => {
   const query = req.query.q as string;
@@ -74,12 +74,11 @@ app.get('/api/products/search', (req, res) => {
   res.json(filteredProducts);
 });
 
-app.post('/api/users/:userId/cart/:cartId/items', (req, res) => {
+app.post('/api/users/:userId/cart/items', (req, res) => {
   const userId = req.params.userId;
-  const cartId = req.params.cartId;
   const { productId, quantity } = req.body;
   
-  console.log(`🛒 [CART] Add item request: userId="${userId}", cartId="${cartId}", productId=${productId}, quantity=${quantity}`);
+  console.log(`🛒 [CART] Add item request: userId="${userId}", productId=${productId}, quantity=${quantity}`);
   
   if (!productId || !quantity || quantity <= 0) {
     console.log(`❌ [CART] Invalid request: missing or invalid productId/quantity`);
@@ -95,42 +94,36 @@ app.post('/api/users/:userId/cart/:cartId/items', (req, res) => {
   console.log(`📝 [CART] Product found: "${product.name}" (CHF ${product.price})`);
   
   if (!shoppingCarts[userId]) {
-    shoppingCarts[userId] = {};
-    console.log(`🆕 [CART] Created new user cart storage for userId="${userId}"`);
+    shoppingCarts[userId] = [];
+    console.log(`🆕 [CART] Created new cart for userId="${userId}"`);
   }
   
-  if (!shoppingCarts[userId][cartId]) {
-    shoppingCarts[userId][cartId] = [];
-    console.log(`🆕 [CART] Created new cart "${cartId}" for user "${userId}"`);
-  }
-  
-  const existingItem = shoppingCarts[userId][cartId].find(item => item.productId === productId);
+  const existingItem = shoppingCarts[userId].find(item => item.productId === productId);
   
   if (existingItem) {
     const oldQuantity = existingItem.quantity;
     existingItem.quantity += quantity;
     console.log(`🔄 [CART] Updated existing item: "${product.name}" quantity ${oldQuantity} -> ${existingItem.quantity}`);
   } else {
-    shoppingCarts[userId][cartId].push({ productId, quantity });
+    shoppingCarts[userId].push({ productId, quantity });
     console.log(`➕ [CART] Added new item: "${product.name}" x${quantity}`);
   }
   
-  const totalItems = shoppingCarts[userId][cartId].length;
-  console.log(`✅ [CART] Cart "${cartId}" now has ${totalItems} different items`);
+  const totalItems = shoppingCarts[userId].length;
+  console.log(`✅ [CART] Cart now has ${totalItems} different items`);
   
-  res.json({ message: 'Artikel zum Warenkorb hinzugefügt', cart: shoppingCarts[userId][cartId] });
+  res.json({ message: 'Artikel zum Warenkorb hinzugefügt', cart: shoppingCarts[userId] });
 });
 
-app.get('/api/users/:userId/cart/:cartId', (req, res) => {
+app.get('/api/users/:userId/cart', (req, res) => {
   const userId = req.params.userId;
-  const cartId = req.params.cartId;
   
-  console.log(`📋 [CART] Get cart request: userId="${userId}", cartId="${cartId}"`);
+  console.log(`📋 [CART] Get cart request: userId="${userId}"`);
   
-  const cart = (shoppingCarts[userId] && shoppingCarts[userId][cartId]) || [];
+  const cart = shoppingCarts[userId] || [];
   
   if (cart.length === 0) {
-    console.log(`🛒 [CART] Empty cart for userId="${userId}", cartId="${cartId}"`);
+    console.log(`🛒 [CART] Empty cart for userId="${userId}"`);
   } else {
     console.log(`🛒 [CART] Found ${cart.length} items in cart`);
   }

@@ -1,20 +1,7 @@
-interface Product {
-  id: number;
-  name: string;
-  category: string;
-  price: number;
-}
+import {addToCart, getCart, type Product, searchProducts} from '../src/cart-api-client';
 
-interface CartItem {
-  productId: number;
-  quantity: number;
-  product?: Product;
-  totalPrice?: number;
-}
 
-const BASE_URL = 'http://localhost:3000';
 const USER_ID = 'test-user-123';
-const CART_ID = 'omelette-cart-123';
 
 const omeletteIngredients = [
   'Eier', 'Butter', 'Milch', 'Käse', 'Schinken', 
@@ -22,52 +9,6 @@ const omeletteIngredients = [
   'Salz', 'Pfeffer'
 ];
 
-async function searchProducts(query: string): Promise<Product[]> {
-  try {
-    const response = await fetch(`${BASE_URL}/api/products/search?q=${encodeURIComponent(query)}`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error(`Fehler beim Suchen nach "${query}":`, error);
-    return [];
-  }
-}
-
-async function addToCart(userId: string, cartId: string, productId: number, quantity: number): Promise<void> {
-  try {
-    const response = await fetch(`${BASE_URL}/api/users/${userId}/cart/${cartId}/items`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ productId, quantity }),
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const result = await response.json();
-    console.log(`✓ ${result.message}`);
-  } catch (error) {
-    console.error(`Fehler beim Hinzufügen von Produkt ${productId}:`, error);
-  }
-}
-
-async function getCart(userId: string, cartId: string): Promise<CartItem[]> {
-  try {
-    const response = await fetch(`${BASE_URL}/api/users/${userId}/cart/${cartId}`);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Fehler beim Abrufen des Warenkorbs:', error);
-    return [];
-  }
-}
 
 async function testOmeletteWorkflow(): Promise<void> {
   console.log('🍳 Starte Omelette-Einkauf Workflow...\n');
@@ -93,12 +34,12 @@ async function testOmeletteWorkflow(): Promise<void> {
   console.log(`\n🛒 Füge ${foundProducts.length} Produkte zum Warenkorb hinzu:`);
   
   for (const product of foundProducts) {
-    await addToCart(USER_ID, CART_ID, product.id, 1);
+    await addToCart(USER_ID, product.id, 1);
     await new Promise(resolve => setTimeout(resolve, 100));
   }
   
   console.log('\n📋 Warenkorb Inhalt:');
-  const cart = await getCart(USER_ID, CART_ID);
+  const cart = await getCart(USER_ID);
   
   if (cart.length === 0) {
     console.log('   Warenkorb ist leer');

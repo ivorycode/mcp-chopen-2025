@@ -1,3 +1,22 @@
+### Workshop:
+
+- You need to create an OAuth App in your GitHub account
+  - instructions: https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app
+  - OAuth Apps: https://github.com/settings/apps
+    - For the Homepage URL, specify `http://localhost:8788`
+    - For the Authorization callback URL, specify `http://localhost:8788/callback`
+- Copy `.dev.vars.eaxample` to `.dev.vars`
+  - Fill in the `Client ID` and the `Client Secret` 
+- Start the remote MCP Server via `npm run dev`
+  - Server shoud start at `http://localhost:8788`
+- Start Inspector `npm run inspect`
+  - connect: Transport Type `Streamable HTTP` and URL `http://localhost:8788/mcp`
+- Connect Claude Code, Visual Stdio Code or Goose
+
+----
+
+
+
 # Model Context Protocol (MCP) Server + Github OAuth
 
 This is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/introduction) server that supports remote MCP connections, with Github OAuth built-in.
