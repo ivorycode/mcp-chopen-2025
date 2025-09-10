@@ -3,11 +3,16 @@ import { anthropic } from '@ai-sdk/anthropic';
 import { google } from '@ai-sdk/google';
 import {streamText, UIMessage, convertToModelMessages, stepCountIs} from 'ai';
 import {createTools} from '@/tools/tools';
+import {createMcpStdioClient} from '@/tools/mcp-stdio-tools';
+import {createMcpRemoteClient} from '@/tools/mcp-remote-tools';
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
 
 const tools = createTools();
+// const mcpClient = await createMcpStdioClient();
+// const mcpClient = await createMcpRemoteClient();
+// const tools = await mcpClient.tools();
 
 export async function POST(req: Request) {
   const { messages }: { messages: UIMessage[] } = await req.json();

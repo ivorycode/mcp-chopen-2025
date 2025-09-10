@@ -1,7 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import {registerTimeTool} from './tools/timeTool.ts';
-import {registerWeatherTools} from './tools/weatherTool.ts';
+import {registerWeatherTools} from './tools/weatherTool.js';
 
 const server = new McpServer({
   name: "workshop-mcp-server",
@@ -11,7 +10,6 @@ const server = new McpServer({
   },
 });
 
-registerTimeTool(server);
 registerWeatherTools(server);
  
 async function main() {

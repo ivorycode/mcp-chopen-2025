@@ -52,8 +52,6 @@ console.log(await result.toolResults);
 
 
 
-
-
 React: On `page.tsx` add the snippet:
 
 ```
@@ -67,7 +65,7 @@ case 'tool-weather':
 
 
 
-- Write an aditional get-time tool. With this the chatbot should be able to answert the question: "What is the current time?"
+- Write an aditional *get-time* tool. With this the chatbot should be able to answert the question: "What is the current time?"
 
   
 
@@ -86,7 +84,17 @@ Call the tools via Inspector.
 
 
 
-Try to call the Tools provided by the MCP Server from the chatbot of exercise 1.
+When you have verified via Inspector that the server is working, then make a build:
+
+```
+npm run build
+```
+
+-> this produces the compiled JavaScript in `dist/`
+
+
+
+Now try to call the Tools provided by the MCP Server from the chatbot of exercise 1.
 
 ```
 import {experimental_createMCPClient as createMCPClient} from 'ai';
@@ -94,8 +102,8 @@ import {Experimental_StdioMCPTransport as StdioMCPTransport} from 'ai/mcp-stdio'
 
 const mcpClient = await createMCPClient({
     transport: new StdioMCPTransport({
-      command: 'npx',
-      args: ['tsx', '../10-mcp-stdio/server.ts'],
+      command: 'node',
+      args: ['../10-mcp-stdio/dist/server.js'],
     }),
 });
 const tools = await mcpClient.tools();
@@ -179,7 +187,7 @@ For this exercise, I chose a starter template from Cloudflare:
 
 https://developers.cloudflare.com/agents/guides/remote-mcp-server/#add-authentication
 
-It takes quite some steps to get it running. Follow the instructions in ``12-mcp-cloudflare-auth/README` and consult the link above ...
+It takes quite some steps to get it running. Follow the instructions in `12-mcp-cloudflare-auth/README` and consult the link above ...
 
 ```
 npm install
@@ -213,7 +221,7 @@ npm run test
 
 
 Take one of the previous MCP Impementations from 2,3 or 4.
-Implement the tools to interact with this Webshop API. The most pragmatic aproach is to copy the file ``90-store-api/src/cart-api-client.ts` into the `tools` directory of the MCP implementation an then use these functions from the tool implementation.
+Implement the tools to interact with this Webshop API. The most pragmatic aproach is to copy the file `90-store-api/src/cart-api-client.ts` into the `tools` directory of the MCP implementation an then use these functions from the tool implementation.
 
 - Test your tools with the MCP Inspector
 - Connect via Claude Code, Visual Studio Code or via Goose ... play and have fun ....
