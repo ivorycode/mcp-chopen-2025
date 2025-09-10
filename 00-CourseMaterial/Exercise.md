@@ -106,7 +106,7 @@ const tools = await mcpClient.tools();
 Try to call the tools provided by the MCP Server from:
 
 - Claude Code -> Settings -> Developer ->Local MCP servers
-- Visual Studio Code -> Ctrl-Shift-P -> MCP: Add Server
+- Visual Studio Code -> Ctrl-Shift-P -> MCP: Add Server - Then set CoPilot to "Agent"-Mode (bottom left)
 - Goose -> Extensions -> Add custom extensions
 
 
