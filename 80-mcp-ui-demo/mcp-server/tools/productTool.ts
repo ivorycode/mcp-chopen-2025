@@ -3,7 +3,7 @@ import {McpServer} from '@modelcontextprotocol/sdk/server/mcp.js';
 import { createUIResource } from "@mcp-ui/server";
 import {z} from 'zod';
 
-export function registerProductTool(server: McpServer){
+export function registerProductTool(server: McpServer, PORT: number){
   server.tool(
     "get_product_detail",
     "Fetch the details for a product with a given id",
@@ -28,7 +28,7 @@ export function registerProductTool(server: McpServer){
             uri: `ui://product-catalog/article/${productId}`,
             content: {
               type: "externalUrl",
-              iframeUrl: `http://localhost:3000/product-preview/${productId}`,
+              iframeUrl: `http://localhost:${PORT}/product-preview/${productId}`,
             },
             encoding: "text",
           }),
