@@ -19,7 +19,8 @@ In the directory you have chosen:
 
 ```bash
 npm install
-npm start
+npm start // for the node chatbot
+npm run dev // for the react chatbot
 ```
 
 This should start the chatbot on the command-line or it should start a web server serving the url `http://localhost:3000` , which you can open in your browser.
@@ -94,7 +95,7 @@ import {Experimental_StdioMCPTransport as StdioMCPTransport} from 'ai/mcp-stdio'
 const mcpClient = await createMCPClient({
     transport: new StdioMCPTransport({
       command: 'npx',
-      args: ['tsx', '../10-mcp-stdio-solution/server.ts'],
+      args: ['tsx', '../10-mcp-stdio/server.ts'],
     }),
 });
 const tools = await mcpClient.tools();
